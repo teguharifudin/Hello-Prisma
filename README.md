@@ -32,6 +32,12 @@ postgresql://johndoe:randompassword@localhost:5432/mydb?schema=public
 npx prisma generate
 ```
 
+### Running the App
+
+```
+npm start
+```
+
 ### Postman
 
 POST http://localhost:5000/api/register
