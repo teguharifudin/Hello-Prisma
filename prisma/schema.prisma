@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  password  String
+  role      Role
+  profile   Profile?
+  bookings  Booking[]
+  events    Event[]   @relation("EventManager")
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  isDeleted Boolean   @default(false)
+  passwordResetToken      String?
+  passwordResetTokenExpiry DateTime?
+  logs      Log[]
+  roleChangeRequests    RoleChangeRequest[]
+
+  @@map("users")
+}
+
+model Profile {
+  id        String  @id @default(uuid())
+  userId    String  @unique
+  firstName String
+  lastName  String
+  phone     String?
+  imageUrl  String?
+  user      User    @relation(fields: [userId], references: [id])
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@map("profiles")
+}
+
+model Event {
+  id          String     @id @default(uuid())
+  title       String
+  description String
+  date        DateTime
+  time        DateTime
+  location    String
+  bannerImage String?
+  ticketTypes TicketType[]
+  bookings    Booking[]
+  managerId   String
+  manager     User       @relation("EventManager", fields: [managerId], references: [id])
+  categoryId  String
+  category    Category   @relation(fields: [categoryId], references: [id])
+  tags        EventTag[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  isDeleted   Boolean    @default(false)
+  logs        Log[]
+  isActive                 Boolean   @default(true)
+  activationCode           String?
+
+  @@map("events")
+}
+
+model TicketType {
+  id        String   @id @default(uuid())
+  eventId   String
+  type      String   // e.g., "single", "group"
+  price     Float
+  quantity  Int
+  event     Event    @relation(fields: [eventId], references: [id])
+  bookings  Booking[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@map("ticket_types")
+}
+
+model Booking {
+  id           String     @id @default(uuid())
+  userId       String
+  eventId      String
+  ticketTypeId String     
+  tickets      Int
+  status       String
+  ticketCode   String     @unique
+  totalPrice   Float      
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  isDeleted    Boolean    @default(false)
+  user         User       @relation(fields: [userId], references: [id])
+  event        Event      @relation(fields: [eventId], references: [id])
+  ticketType   TicketType @relation(fields: [ticketTypeId], references: [id])
+  logs         Log[]      
+
+  @@map("bookings")
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  events    Event[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@map("categories")
+}
+
+model Tag {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  events    EventTag[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  isDeleted Boolean  @default(false)
+
+  @@map("tags")
+}
+
+model EventTag {
+  eventId String
+  tagId   String
+  event   Event @relation(fields: [eventId], references: [id])
+  tag     Tag   @relation(fields: [tagId], references: [id])
+
+  @@id([eventId, tagId])
+  @@map("event_tags")
+}
+
+model Log {
+  id        String   @id @default(uuid())
+  userId    String?
+  eventId   String?
+  bookingId String?
+  action    String   // e.g., "user_signin", "user_signout", "event_booked"
+  timestamp DateTime @default(now())
+  user      User?    @relation(fields: [userId], references: [id])
+  event     Event?   @relation(fields: [eventId], references: [id])
+  booking   Booking? @relation(fields: [bookingId], references: [id])
+
+  @@map("logs")
+}
+
+model RoleChangeRequest {
+  id          String   @id @default(uuid())
+  userId      String
+  newRole     Role
+  status      RequestStatus @default(PENDING)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
+
+  @@map("role_change_requests")
+}
+
+enum Role {
+  ATTENDEE
+  MANAGER
+  ADMIN
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
