@@ -39,7 +39,7 @@ POST http://localhost:5000/api/register
 {
     "firstName": "Teguh",
     "lastName": "Arief",
-    "email": "teguh.arifuidin@gmail.com",
+    "email": "teguh.arifudin@gmail.com",
     "phone": "@Pass123",
     "password": "@Pass123"
 }
@@ -48,7 +48,7 @@ POST http://localhost:5000/api/register
 POST http://localhost:5000/api/login
 ```
 {
-    "email": "teguh.arifuidin@gmail.com",
+    "email": "teguh.arifudin@gmail.com",
     "password": "@Pass123"
 }
 ```
