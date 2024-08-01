@@ -12,6 +12,9 @@ git clone git@github.com:teguharifudin/Hello-Prisma.git
 ```
 cd Hello-Prisma
 ```
+```
+npm install
+```
 
 ## Usage
 
@@ -19,9 +22,6 @@ cd Hello-Prisma
 
 ### Setting up Prisma
 
-```
-npm install @prisma/client
-```
 ```
 npx prisma init
 ```
